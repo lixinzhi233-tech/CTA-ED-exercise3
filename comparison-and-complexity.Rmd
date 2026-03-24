@@ -1,4 +1,4 @@
----
+in---
 title: "Computational Text Analysis - Exercise 3: Comparison and complexity"
 author: "[your name here]"
 date: "25/02/2026"
@@ -295,5 +295,38 @@ ggplot(sum_corpus, aes(x=speaker, y=mean)) +
 ## Exercises
 
 1. Compute distance measures such as "euclidean" or "manhattan" for the MP tweets as above, comparing between tweets by MPs and tweets by PM, Theresa May. 
+
+
+```{r}
+# 1. cacluate distance (take education as example)
+dist_euclidean <- textstat_dist(dfmat, 
+                                margin = "documents", 
+                                method = "euclidean")
+
+# 2. turn to matrix and then take Theresa May
+dist_matrix <- as.matrix(dist_euclidean)
+may_dist <- as.data.frame(dist_matrix[23, c(1:22, 24)])
+
+# 3. prepare for visualation
+colnames(may_dist) <- "dist_score"
+may_dist <- tibble::rownames_to_column(may_dist, "username")
+
+# 4. visualaiton
+ggplot(may_dist, aes(x = reorder(username, dist_score), y = dist_score)) +
+  geom_point() +
+  coord_flip() +
+  labs(title = "Euclidean Distance to Theresa May", y = "Distance Score") +
+  theme_minimal()
+
+```
 2. Estimate at least three other complexity measures for the EU speeches as above. Consider how the results compare to the Flesch-Kincaid measure used in the article by @schoonvelde_liberals_2019.
+```{r}
+# caculate Gunning Fog, Coleman-Liau, SMOG
+comp_multi <- textstat_readability(speeches$text,
+                measure = c("Flesch.Kincaid", "FOG", "Coleman.Liau.grade", "SMOG"))
+
+# see the relvance
+cor(comp_multi[, -1])
+```
+
 3. (Advanced---optional) Estimate similarity scores between the MP tweets and the PM tweets for each week contained in the data. Plot the results. 
